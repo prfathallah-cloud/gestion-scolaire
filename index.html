@@ -87,7 +87,7 @@ header{position:relative}
 <header><h1 id="hn">تدبير المؤسسة التعليمية</h1><p>استعمال الزمن · الغيابات · التعويض · الساعات المنجزة</p><button class="btn alt" id="lo">خروج</button></header>
 <nav role="tablist" id="nav"></nav>
 <main id="app"></main>
-<div id="lg"><form><h2>تسجيل الدخول</h2><label>البريد الإلكتروني<input type="email" name="e" required autocomplete="username"></label><label>كلمة المرور<input type="password" name="p" required autocomplete="current-password"></label><button class="btn">دخول</button><p id="le" role="alert"></p></form></div><div id="toast" role="status"></div>
+<div id="lg"><form><h2>تسجيل الدخول</h2><button type="button" class="btn" id="gb">الدخول بحساب Google</button><p id="le" role="alert"></p></form></div><div id="toast" role="status"></div>
 <script>
 const DAYS=["الإثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"],HOURS=["08:00-09:00","09:00-10:00","10:00-11:00","11:00-12:00","14:00-15:00","15:00-16:00","16:00-17:00","17:00-18:00"];
 const ic=d=>`<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
@@ -242,7 +242,7 @@ function initCloud(){
  if(!window.firebase||FB.apiKey==="YOUR_API_KEY"){const o=document.getElementById("lg");if(o)o.remove();return}
  firebase.initializeApp(FB);auth=firebase.auth();ref=firebase.firestore().doc("school/main");
  const ov=document.getElementById("lg"),lo=document.getElementById("lo");
- ov.querySelector("form").onsubmit=ev=>{ev.preventDefault();const f=ev.target;document.getElementById("le").textContent="";auth.signInWithEmailAndPassword(f.e.value.trim(),f.p.value).catch(()=>{document.getElementById("le").textContent="بيانات الدخول غير صحيحة"})};
+ document.getElementById("gb").onclick=()=>{const p=new firebase.auth.GoogleAuthProvider(),le=document.getElementById("le");p.setCustomParameters({prompt:"select_account"});le.textContent="";auth.signInWithPopup(p).catch(e=>{if(e.code==="auth/popup-blocked"||e.code==="auth/operation-not-supported-in-this-environment")auth.signInWithRedirect(p);else if(e.code!=="auth/popup-closed-by-user"&&e.code!=="auth/cancelled-popup-request")le.textContent="تعذر الدخول. تأكد من تفعيل Google وإضافة النطاق في Firebase."})};
  lo.onclick=()=>auth.signOut();let un=null;
  auth.onAuthStateChanged(u=>{if(un){un();un=null}
   if(!u){ov.style.display="flex";lo.style.display="none";return}
@@ -251,7 +251,7 @@ function initCloud(){
    if(!s.exists){ref.set(JSON.parse(JSON.stringify(S)));return}
    S=Object.assign({name:"",teachers:[],slots:{},abs:[],mk:[],hol:[]},s.data());
    try{localStorage.setItem("school-v2",JSON.stringify(S))}catch(e){}
-   const a=document.activeElement;if(!(a&&/INPUT|SELECT|TEXTAREA/.test(a.tagName)&&a.closest("main")))render()},()=>toast("تعذر الاتصال بقاعدة البيانات"))})}
+   const a=document.activeElement;if(!(a&&/INPUT|SELECT|TEXTAREA/.test(a.tagName)&&a.closest("main")))render()},er=>{const d=er&&er.code==="permission-denied";toast(d?"هذا الحساب غير مسموح له بالدخول":"تعذر الاتصال بقاعدة البيانات");if(d){document.getElementById("le").textContent="هذا الحساب غير مسموح له بالدخول";auth.signOut()}})})}
 initCloud();
 render();
 </script>
