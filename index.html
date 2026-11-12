@@ -4,6 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>تدبير المؤسسة التعليمية</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0b3340">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="تدبير المؤسسة">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -100,7 +107,7 @@ let P={a:mStart(0),b:mEnd(0)};
 try{let r=localStorage.getItem("school-v2");if(r)S=Object.assign(S,JSON.parse(r));else{r=localStorage.getItem("school-v1");if(r){const o=JSON.parse(r);S.teachers=o.teachers||[];for(const t in o.slots||{}){S.slots[t]={};for(const k in o.slots[t])if(o.slots[t][k])S.slots[t][k]={c:o.slots[t][k],r:""}}S.abs=(o.abs||[]).map(x=>({id:x.id,t:x.t,d:x.d,h:+x.h,sl:[],j:x.j,r:x.r}))}}}catch(e){}
 // === إعدادات Firebase: عوّض القيم التالية بقيم مشروعك (Project settings > Your apps > Web) ===
 const FB={apiKey:"AIzaSyDA6ejooYGaCMuOlL4fw0YGoh3KdntguLM",authDomain:"gestion-scolaire-b5a16.firebaseapp.com",projectId:"gestion-scolaire-b5a16",storageBucket:"gestion-scolaire-b5a16.firebasestorage.app",messagingSenderId:"580267734253",appId:"1:580267734253:web:eaacac6cd1854c12b1c8e4"};
-let ref=null,auth=null,tmr=null;
+let ref=null,auth=null,tmr=null,IP=null;
 const save=()=>{try{localStorage.setItem("school-v2",JSON.stringify(S))}catch(e){}
  if(ref&&auth&&auth.currentUser){clearTimeout(tmr);tmr=setTimeout(()=>ref.set(JSON.parse(JSON.stringify(S))).catch(()=>toast("تعذرت المزامنة مع قاعدة البيانات")),500)}};
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -194,6 +201,7 @@ function vMk(){if(!S.teachers.length)return noT();
 function vSet(){return `<div class="card"><h2>المؤسسة</h2><div class="row"><label>اسم المؤسسة (يظهر في التقارير)<input id="sn" value="${esc(S.name)}"></label></div></div>
  <div class="card"><h2>تنبيه الغياب</h2><div class="row"><label>الحد الأقصى لساعات الغياب غير المبرر في الفترة (0 = بدون تنبيه)<input type="number" id="lm" min="0" value="${+S.lim||0}"></label></div></div>
  <div class="card"><h2>العطل (لا تُحسب فيها الحصص)</h2><form id="fH"><label>من<input type="date" name="a" required></label><label>إلى<input type="date" name="b" required></label><label>المناسبة<input name="l"></label><button class="btn">إضافة</button></form>${S.hol.length?S.hol.map(h=>`<div class="row" style="margin:0"><span>${h.a} ← ${h.b} ${esc(h.l)}</span><button class="del" data-del="h" data-id="${h.id}">حذف</button></div>`).join(""):'<div class="empty">لا توجد عطل مسجلة.</div>'}</div>
+ <div class="card"><h2>تثبيت التطبيق</h2><p style="color:var(--mut);font-size:14px">${IP?"ثبّت البرنامج على جهازك ليفتح كتطبيق مستقل بأيقونة خاصة.":"أندرويد والحاسوب: قائمة المتصفح ثم «تثبيت التطبيق». الآيفون: زر المشاركة في Safari ثم «إضافة إلى الشاشة الرئيسية»."}</p>${IP?'<button class="btn" id="ins">تثبيت التطبيق</button>':""}</div>
  <div class="card"><h2>النسخ الاحتياطي</h2><p style="color:var(--mut);font-size:14px">${ref?"البيانات متزامنة مع Firebase بين كل الأجهزة. صدّر نسخة احتياطية من حين لآخر للأمان.":"البيانات محفوظة في هذا المتصفح فقط، فصدّر نسخة بانتظام."}</p><div class="row">${DL?'<button class="btn" id="bk">حفظ نسخة احتياطية</button>':""}<label>استيراد نسخة<input type="file" id="im" accept=".json"></label><button class="del" id="rs">مسح كل البيانات</button></div></div>`}
 
 function render(){document.getElementById("hn").textContent=S.name||"تدبير المؤسسة التعليمية";
@@ -225,6 +233,7 @@ app.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return
  if(b.dataset.pm!==undefined){const o=+b.dataset.pm;P={a:mStart(o),b:mEnd(o)};render()}
  if(b.id==="pr"){try{window.print()}catch(er){toast("استعمل Ctrl+P للطباعة")}}
  if(b.id==="xl")xl();
+ if(b.id==="ins"&&IP){IP.prompt();IP.userChoice.finally(()=>{IP=null;render()})}
  if(b.id==="bk")DL.save({filename:"school-backup.json",data:JSON.stringify(S)}).then(()=>toast("تم الحفظ")).catch(()=>{});
  if(b.id==="rs"&&ask(b)){S={name:"",teachers:[],slots:{},abs:[],mk:[],hol:[]};save();render()}});
 app.addEventListener("change",e=>{const t=e.target,id=t.id,f=t.closest("form");
@@ -240,7 +249,7 @@ app.addEventListener("input",e=>{const t=e.target;if(t.id==="lm"){S.lim=+t.value
 DL={save:({filename,data})=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([data]));a.download=filename;document.body.appendChild(a);a.click();a.remove();return Promise.resolve()}};
 function initCloud(){
  if(!window.firebase||FB.apiKey==="YOUR_API_KEY"){const o=document.getElementById("lg");if(o)o.remove();return}
- firebase.initializeApp(FB);auth=firebase.auth();ref=firebase.firestore().doc("school/main");
+ firebase.initializeApp(FB);auth=firebase.auth();const db=firebase.firestore();db.enablePersistence({synchronizeTabs:true}).catch(()=>{});ref=db.doc("school/main");
  const ov=document.getElementById("lg"),lo=document.getElementById("lo");
  document.getElementById("gb").onclick=()=>{const p=new firebase.auth.GoogleAuthProvider(),le=document.getElementById("le");p.setCustomParameters({prompt:"select_account"});le.textContent="";auth.signInWithPopup(p).catch(e=>{if(e.code==="auth/popup-blocked"||e.code==="auth/operation-not-supported-in-this-environment")auth.signInWithRedirect(p);else if(e.code!=="auth/popup-closed-by-user"&&e.code!=="auth/cancelled-popup-request")le.textContent="تعذر الدخول. تأكد من تفعيل Google وإضافة النطاق في Firebase."})};
  lo.onclick=()=>auth.signOut();let un=null;
@@ -248,10 +257,12 @@ function initCloud(){
   if(!u){ov.style.display="flex";lo.style.display="none";return}
   ov.style.display="none";lo.style.display="block";
   un=ref.onSnapshot(s=>{if(s.metadata.hasPendingWrites)return;
-   if(!s.exists){ref.set(JSON.parse(JSON.stringify(S)));return}
+   if(!s.exists){if(!s.metadata.fromCache)ref.set(JSON.parse(JSON.stringify(S)));return}
    S=Object.assign({name:"",teachers:[],slots:{},abs:[],mk:[],hol:[]},s.data());
    try{localStorage.setItem("school-v2",JSON.stringify(S))}catch(e){}
    const a=document.activeElement;if(!(a&&/INPUT|SELECT|TEXTAREA/.test(a.tagName)&&a.closest("main")))render()},er=>{const d=er&&er.code==="permission-denied";toast(d?"هذا الحساب غير مسموح له بالدخول":"تعذر الاتصال بقاعدة البيانات");if(d){document.getElementById("le").textContent="هذا الحساب غير مسموح له بالدخول";auth.signOut()}})})}
+addEventListener("beforeinstallprompt",e=>{e.preventDefault();IP=e;if(tab==="set")render()});
+if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
 initCloud();
 render();
 </script>
