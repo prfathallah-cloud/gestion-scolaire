@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>تدبير المؤسسة التعليمية</title>
-<link rel="manifest" href="manifest.webmanifest">
+<link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0b3340">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -88,13 +88,18 @@ header{position:relative}
 #lg{position:fixed;inset:0;background:var(--bg);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px}
 #lg form{background:var(--sf);border:1px solid var(--ln);border-radius:14px;padding:22px;width:100%;max-width:360px;flex-direction:column;align-items:stretch;box-shadow:var(--sh);margin:0}
 #lg label{flex:none}#le{color:var(--rd);margin:0;font-size:13px;min-height:1em}
+.ibt{display:none}
+header{display:grid;grid-template-columns:1fr auto auto;column-gap:8px;align-items:center}
+header h1,header p{grid-column:1}
+header #lo,header #ib{position:static;transform:none;grid-row:1/3;padding:6px 14px;font-size:13px}
+header #lo{display:none}
 </style>
 </head>
 <body>
-<header><h1 id="hn">تدبير المؤسسة التعليمية</h1><p>استعمال الزمن · الغيابات · التعويض · الساعات المنجزة</p><button class="btn alt" id="lo">خروج</button></header>
+<header><h1 id="hn">تدبير المؤسسة التعليمية</h1><p>استعمال الزمن · الغيابات · التعويض · الساعات المنجزة</p><button class="btn alt ibt" id="ib">تثبيت التطبيق</button><button class="btn alt" id="lo">خروج</button></header>
 <nav role="tablist" id="nav"></nav>
 <main id="app"></main>
-<div id="lg"><form><h2>تسجيل الدخول</h2><button type="button" class="btn" id="gb">الدخول بحساب Google</button><p id="le" role="alert"></p></form></div><div id="toast" role="status"></div>
+<div id="lg"><form><h2>تسجيل الدخول</h2><button type="button" class="btn" id="gb">الدخول بحساب Google</button><button type="button" class="btn alt ibt">تثبيت التطبيق</button><p id="le" role="alert"></p></form></div><div id="toast" role="status"></div>
 <script>
 const DAYS=["الإثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"],HOURS=["08:00-09:00","09:00-10:00","10:00-11:00","11:00-12:00","14:00-15:00","15:00-16:00","16:00-17:00","17:00-18:00"];
 const ic=d=>`<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
@@ -115,7 +120,7 @@ const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6),tn=i
 const cell=(t,k)=>(S.slots[t]||{})[k],used=c=>c&&(c.c||c.r),hol=d=>S.hol.some(h=>d>=h.a&&d<=h.b);
 const weekly=t=>Object.keys(S.slots[t]||{}).filter(k=>used(cell(t,k))).length;
 const opts=(s,all)=>(all?'<option value="">الكل</option>':"")+S.teachers.map(t=>`<option value="${t.id}"${t.id===s?" selected":""}>${esc(t.name)}</option>`).join("");
-const toast=m=>{const e=document.getElementById("toast");e.textContent=m;e.className="on";setTimeout(()=>e.className="",2400)};
+const toast=(m,t)=>{const e=document.getElementById("toast");e.textContent=m;e.className="on";setTimeout(()=>e.className="",t||2400)};
 function stats(t,a,b){const wd={};for(const k in S.slots[t.id]||{})if(used(cell(t.id,k))){const d=k.split("-")[0];wd[d]=(wd[d]||0)+1}
 let p=0;for(const x=D(a),e=D(b);x<=e;x.setDate(x.getDate()+1)){const g=(x.getDay()+6)%7;if(g<6&&wd[g]&&!hol(iso(x)))p+=wd[g]}
 const f=r=>r.t===t.id&&r.d>=a&&r.d<=b&&!hol(r.d);let ab=0,n=0,uj=0,m=0;
@@ -261,7 +266,13 @@ function initCloud(){
    S=Object.assign({name:"",teachers:[],slots:{},abs:[],mk:[],hol:[]},s.data());
    try{localStorage.setItem("school-v2",JSON.stringify(S))}catch(e){}
    const a=document.activeElement;if(!(a&&/INPUT|SELECT|TEXTAREA/.test(a.tagName)&&a.closest("main")))render()},er=>{const d=er&&er.code==="permission-denied";toast(d?"هذا الحساب غير مسموح له بالدخول":"تعذر الاتصال بقاعدة البيانات");if(d){document.getElementById("le").textContent="هذا الحساب غير مسموح له بالدخول";auth.signOut()}})})}
-addEventListener("beforeinstallprompt",e=>{e.preventDefault();IP=e;if(tab==="set")render()});
+const ibs=[...document.querySelectorAll(".ibt")],showIb=on=>ibs.forEach(b=>b.style.display=on?"block":"none");
+const standalone=()=>matchMedia("(display-mode: standalone)").matches||navigator.standalone;
+const ios=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+addEventListener("beforeinstallprompt",e=>{e.preventDefault();IP=e;if(!standalone())showIb(true);if(tab==="set")render()});
+addEventListener("appinstalled",()=>{IP=null;showIb(false);toast("تم تثبيت التطبيق");if(tab==="set")render()});
+if(!standalone())setTimeout(()=>{if(!IP)showIb(true)},2500);
+ibs.forEach(b=>b.onclick=()=>{if(IP){IP.prompt();IP.userChoice.finally(()=>{IP=null;showIb(false);if(tab==="set")render()})}else toast(ios?"في Safari: اضغط زر المشاركة ثم «إضافة إلى الشاشة الرئيسية»":"من قائمة المتصفح ⋮ اختر «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية»",7000)});
 if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
 initCloud();
 render();
