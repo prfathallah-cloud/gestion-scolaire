@@ -96,6 +96,8 @@ header #lo{display:none}
 @keyframes pop{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
 .md,.md{align-items:center;justify-content:center;padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px))}
 .mb{border-radius:16px;max-height:80vh;padding-bottom:16px;animation:pop .2s ease}
+td.mv{white-space:nowrap}.mvb{padding:4px 10px;min-width:34px;font-size:16px}.btn:disabled{opacity:.35;cursor:default}
+.ro{min-width:110px}.ro .sj{color:var(--ac);font-size:12px;font-weight:600}
 </style>
 </head>
 <body>
@@ -177,7 +179,7 @@ function vTT(){
  let g='<tr><th></th>'+DAYS.map(d=>`<th>${d}</th>`).join("")+"</tr>";
  HOURS.forEach((hr,i)=>{g+=`<tr><td>${hr}</td>`+DAYS.map((d,j)=>{const k=j+"-"+i;let h="";
   if(TT.m==="t"){const c=cell(TT.v,k)||{c:"",r:""},b=cf.bad[TT.v+"|"+k]?" cf":"";h=`<input class="${c.c?"on":""}${b}" data-k="${k}" data-f="c" value="${esc(c.c)}" placeholder="القسم" aria-label="القسم ${d} ${hr}" list="dc"><input class="r${b}" data-k="${k}" data-f="r" value="${esc(c.r)}" placeholder="القاعة" aria-label="القاعة ${d} ${hr}" list="dr">`}
-  else{const o=S.teachers.filter(t=>{const c=cell(t.id,k);return c&&c[TT.m]===TT.v}).map(t=>`<div class="ro">${esc(t.name)}<small>${esc(cell(t.id,k)[TT.m==="c"?"r":"c"])}</small></div>`).join("");h=o}
+  else{const o=S.teachers.filter(t=>{const c=cell(t.id,k);return c&&c[TT.m]===TT.v}).map(t=>`<div class="ro"><b>${esc(t.name)}</b>${t.subject?` <span class="sj">· ${esc(t.subject)}</span>`:""}<small>${esc(cell(t.id,k)[TT.m==="c"?"r":"c"])}</small></div>`).join("");h=o}
   return `<td>${h}</td>`}).join("")+"</tr>"});
  const dl=f=>`<datalist id="d${f}">${vals(f).map(v=>`<option value="${esc(v)}">`).join("")}</datalist>`;
  return `<div class="card"><div class="row np"><label>العرض حسب<select id="tm"><option value="t"${TT.m==="t"?" selected":""}>الأستاذ</option><option value="c"${TT.m==="c"?" selected":""}>القسم</option><option value="r"${TT.m==="r"?" selected":""}>القاعة</option></select></label><label>الاختيار<select id="tv">${list}</select></label><button class="btn alt" id="pr">طباعة / PDF</button></div>
@@ -185,7 +187,7 @@ function vTT(){
  <p class="np" style="color:var(--mut);font-size:13px">اكتب القسم والقاعة في كل حصة. تُحدَّد الحصص المتعارضة (نفس القسم أو القاعة عند أستاذين) باللون الأحمر.</p></div>`}
 
 function vTeachers(){
- const rows=S.teachers.map(t=>`<tr><td><input data-te="${t.id}" data-tf="name" value="${esc(t.name)}" aria-label="الاسم"></td><td><input data-te="${t.id}" data-tf="subject" value="${esc(t.subject)}" aria-label="المادة"></td><td>${weekly(t.id)}</td><td><button class="del" data-del="t" data-id="${t.id}">حذف</button></td></tr>`).join("");
+ const rows=S.teachers.map((t,i)=>`<tr><td><input data-te="${t.id}" data-tf="name" value="${esc(t.name)}" aria-label="الاسم"></td><td><input data-te="${t.id}" data-tf="subject" value="${esc(t.subject)}" aria-label="المادة"></td><td>${weekly(t.id)}</td><td class="mv"><button class="btn alt mvb" data-mv="-1" data-id="${t.id}" aria-label="نقل للأعلى"${i===0?" disabled":""}>↑</button><button class="btn alt mvb" data-mv="1" data-id="${t.id}" aria-label="نقل للأسفل"${i===S.teachers.length-1?" disabled":""}>↓</button> <button class="del" data-del="t" data-id="${t.id}">حذف</button></td></tr>`).join("");
  return `<div class="card"><h2>إضافة أستاذ</h2><form id="fT"><label>الاسم الكامل<input name="n" required></label><label>المادة<input name="s" required></label><button class="btn">إضافة</button></form>${rows?`<div class="wrap"><table><tr><th>الاسم</th><th>المادة</th><th>ساعات الأسبوع</th><th></th></tr>${rows}</table></div>`:'<div class="empty">لم تتم إضافة أي أستاذ بعد.</div>'}</div>`}
 
 const fBar=(j)=>`<div class="row np flt"><label>بحث<input data-f="q" value="${esc(F.q)}" placeholder="اسم أو سبب"></label><label>الأستاذ<select data-f="t">${opts(F.t,1)}</select></label><label>الشهر<input type="month" data-f="m" value="${F.m}"></label>${j?`<label>الحالة<select data-f="j"><option value="">الكل</option><option value="1"${F.j==="1"?" selected":""}>مبرر</option><option value="0"${F.j==="0"?" selected":""}>غير مبرر</option></select></label>`:""}</div>`;
@@ -237,6 +239,7 @@ app.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return
  if(b.dataset.del){if(!ask(b))return;const id=b.dataset.id,k=b.dataset.del,X=x=>x.id!==id;
   if(k==="t"){S.teachers=S.teachers.filter(X);delete S.slots[id];S.abs=S.abs.filter(x=>x.t!==id);S.mk=S.mk.filter(x=>x.t!==id)}
   if(k==="a")S.abs=S.abs.filter(X);if(k==="m")S.mk=S.mk.filter(X);if(k==="h")S.hol=S.hol.filter(X);save();render();return}
+ if(b.dataset.mv){const i=S.teachers.findIndex(x=>x.id===b.dataset.id),j=i+ +b.dataset.mv;if(i>-1&&j>=0&&j<S.teachers.length){[S.teachers[i],S.teachers[j]]=[S.teachers[j],S.teachers[i]];save();render()}return}
  if(b.dataset.cl){showCl(b.dataset.cl);return}
  if(b.dataset.pm!==undefined){const o=+b.dataset.pm;P={a:mStart(o),b:mEnd(o)};render()}
  if(b.id==="pr"){try{window.print()}catch(er){toast("استعمل Ctrl+P للطباعة")}}
