@@ -146,6 +146,10 @@ main{max-width:min(1720px,100%)}
  #app[data-t=abs]>.card:nth-child(2),#app[data-t=mk]>.card:nth-child(2){grid-column:span 7}
  #app[data-t=set]>.card{grid-column:span 6}
 }
+.ro{padding:5px 4px;line-height:1.35}
+.ro .sb{display:block;font-size:clamp(12px,1.15vw,15px);font-weight:800;color:var(--ac)}
+.ro .tn{display:block;font-size:clamp(10px,.85vw,11.5px);color:var(--mut);font-weight:400}
+.ro small{font-size:clamp(10px,.85vw,11.5px)}
 </style>
 </head>
 <body>
@@ -234,7 +238,7 @@ function vTT(){
  let g='<tr><th></th>'+HOURS.map(h=>`<th>${h}</th>`).join("")+"</tr>";
  DAYS.forEach((d,j)=>{g+=`<tr><td>${d}</td>`+HOURS.map((hr,i)=>{const k=j+"-"+i;let h="";
   if(TT.m==="t"){const c=cell(TT.v,k)||{c:"",r:""},b=cf.bad[TT.v+"|"+k]?" cf":"";h=`<input class="${c.c?"on":""}${b}" data-k="${k}" data-f="c" value="${esc(c.c)}" placeholder="القسم" aria-label="القسم ${d} ${hr}" list="dc"><input class="r${b}" data-k="${k}" data-f="r" value="${esc(c.r)}" placeholder="القاعة" aria-label="القاعة ${d} ${hr}" list="dr">`}
-  else{const o=S.teachers.filter(t=>{const c=cell(t.id,k);return c&&c[TT.m]===TT.v}).map(t=>`<div class="ro"><b>${esc(t.name)}</b>${t.subject?` <span class="sj">· ${esc(t.subject)}</span>`:""}<small>${esc(cell(t.id,k)[TT.m==="c"?"r":"c"])}</small></div>`).join("");h=o}
+  else{const o=S.teachers.filter(t=>{const c=cell(t.id,k);return c&&c[TT.m]===TT.v}).map(t=>`<div class="ro"><b class="sb">${esc(t.subject||t.name)}</b>${t.subject?`<span class="tn">${esc(t.name)}</span>`:""}<small>${esc(cell(t.id,k)[TT.m==="c"?"r":"c"])}</small></div>`).join("");h=o}
   return `<td>${h}</td>`}).join("")+"</tr>"});
  const dl=f=>`<datalist id="d${f}">${vals(f).map(v=>`<option value="${esc(v)}">`).join("")}</datalist>`;
  return `<div class="card"><div class="row np"><label>العرض حسب<select id="tm"><option value="t"${TT.m==="t"?" selected":""}>الأستاذ</option><option value="c"${TT.m==="c"?" selected":""}>القسم</option><option value="r"${TT.m==="r"?" selected":""}>القاعة</option></select></label><label>الاختيار<select id="tv">${list}</select></label><button class="btn alt" id="pr">طباعة / PDF</button></div>
