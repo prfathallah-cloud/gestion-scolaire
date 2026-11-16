@@ -152,6 +152,11 @@ main{max-width:min(1720px,100%)}
 .ro small{font-size:clamp(10px,.85vw,11.5px)}
 .ck div{display:flex;flex-direction:column;line-height:1.3}.ck b{font-size:14px;color:var(--ac)}.ck span{font-size:11px;color:var(--mut)}
 .ck:has(input:checked){background:var(--acs);border-color:var(--ac)}
+.ck{position:relative;cursor:pointer;user-select:none;padding:8px 14px;min-width:130px;transition:background .15s,border-color .15s}
+.ck input{position:absolute;opacity:0;width:0;height:0;pointer-events:none}
+.ck:has(input:checked){background:var(--rds);border-color:var(--rd)}.ck:has(input:checked) b{color:var(--rd)}
+.ck:has(input:checked)::after{content:"غائب";margin-inline-start:auto;font-size:11px;font-weight:800;color:var(--rd)}
+.ck:has(input:focus-visible){outline:2px solid var(--ac);outline-offset:1px}
 </style>
 </head>
 <body>
@@ -256,13 +261,13 @@ function vTeachers(){
 const fBar=(j)=>`<div class="row np flt"><label>بحث<input data-f="q" value="${esc(F.q)}" placeholder="اسم أو سبب"></label><label>الأستاذ<select data-f="t">${opts(F.t,1)}</select></label><label>الشهر<input type="month" data-f="m" value="${F.m}"></label>${j?`<label>الحالة<select data-f="j"><option value="">الكل</option><option value="1"${F.j==="1"?" selected":""}>مبرر</option><option value="0"${F.j==="0"?" selected":""}>غير مبرر</option></select></label>`:""}</div>`;
 const pass=r=>(!F.t||r.t===F.t)&&(!F.m||r.d.slice(0,7)===F.m)&&(!F.q||(tn(r.t)+" "+(r.r||"")+" "+(r.c||"")).includes(F.q));
 function lAbs(){const l=S.abs.filter(r=>pass(r)&&(!F.j||(F.j==="1")===!!r.j)).sort((a,b)=>b.d.localeCompare(a.d));
- return l.length?`<div class="wrap"><table><tr><th>التاريخ</th><th>الأستاذ</th><th>الساعات</th><th>الحصص</th><th>الحالة</th><th>السبب</th><th></th></tr>${l.map(x=>`<tr><td>${x.d}</td><td>${esc(tn(x.t))}</td><td>${x.h}</td><td>${(x.sl||[]).map(i=>HOURS[i].slice(0,2)*1).join("، ")}</td><td><span class="tag${x.j?" ok":""}">${x.j?"مبرر":"غير مبرر"}</span></td><td>${esc(x.r)}</td><td><button class="del" data-del="a" data-id="${x.id}">حذف</button></td></tr>`).join("")}</table></div><p>المجموع: ${l.reduce((a,x)=>a+ +x.h,0)} ساعة في ${l.length} تغيب</p>`:'<div class="empty">لا توجد غيابات مطابقة.</div>'}
+ return l.length?`<div class="wrap"><table><tr><th>التاريخ</th><th>الأستاذ</th><th>الساعات</th><th>الأقسام</th><th>الحالة</th><th>السبب</th><th></th></tr>${l.map(x=>`<tr><td>${x.d}</td><td>${esc(tn(x.t))}</td><td>${x.h}</td><td>${(x.sl||[]).map(i=>{const c=cell(x.t,((D(x.d).getDay()+6)%7)+"-"+i);return c&&c.c?esc(c.c):HOURS[i].slice(0,2)*1}).join("، ")}</td><td><span class="tag${x.j?" ok":""}">${x.j?"مبرر":"غير مبرر"}</span></td><td>${esc(x.r)}</td><td><button class="del" data-del="a" data-id="${x.id}">حذف</button></td></tr>`).join("")}</table></div><p>المجموع: ${l.reduce((a,x)=>a+ +x.h,0)} ساعة في ${l.length} تغيب</p>`:'<div class="empty">لا توجد غيابات مطابقة.</div>'}
 function vAbs(){if(!S.teachers.length)return noT();
  return `<div class="card"><h2>تسجيل غياب</h2><form id="fA"><label>الأستاذ<select name="t">${opts()}</select></label><label>التاريخ<input type="date" name="d" value="${iso(now)}" required></label><div class="row" id="sl" style="flex:1 1 100%;margin:0"></div><label>ساعات الغياب<input type="number" name="h" min="0.5" step="0.5" value="1" required></label><label>الحالة<select name="j"><option value="">غير مبرر</option><option value="1">مبرر</option></select></label><label>السبب<input name="r"></label><button class="btn">تسجيل الغياب</button></form></div>
  <div class="card"><h2>سجل الغيابات</h2>${fBar(1)}<div id="lst">${lAbs()}</div></div>`}
 function slots(){const f=document.getElementById("fA");if(!f)return;const g=(D(f.d.value).getDay()+6)%7,t=f.t.value,out=[];
  for(let i=0;i<HOURS.length;i++){const c=cell(t,g+"-"+i);if(g<6&&used(c))out.push(`<label class="ck"><input type="checkbox" value="${i}"><div><b>${esc(c.c||"—")}</b><span>${HOURS[i]}${c.r?" · "+esc(c.r):""}</span></div></label>`)}
- document.getElementById("sl").innerHTML=out.length?`<div style="flex:1 1 100%;font-size:13px;color:var(--mut)">حصص ${DAYS[g]} لهذا الأستاذ — حدّد الأقسام المعنية بالغياب <button type="button" class="del" id="all">تحديد الكل</button></div>`+out.join(""):'<span style="color:var(--mut);font-size:13px">لا حصص مبرمجة لهذا الأستاذ في هذا اليوم، أدخل عدد الساعات يدويًا.</span>';if(out.length)cnt()}
+ document.getElementById("sl").innerHTML=out.length?`<div style="flex:1 1 100%;font-size:13px;color:var(--mut)">أقسام ${DAYS[g]} لهذا الأستاذ — اضغط على القسم المعني بالغياب (يتلوّن بالأحمر)، واضغط عليه مرة أخرى لإلغائه <button type="button" class="del" id="all">تحديد الكل</button> <button type="button" class="del" id="none" style="color:var(--mut)">إلغاء الكل</button></div>`+out.join(""):'<span style="color:var(--mut);font-size:13px">لا حصص مبرمجة لهذا الأستاذ في هذا اليوم، أدخل عدد الساعات يدويًا.</span>';if(out.length)cnt()}
 const cnt=()=>{const f=document.getElementById("fA");f.h.value=f.querySelectorAll("#sl input:checked").length||""};
 
 function lMk(){const l=S.mk.filter(pass).sort((a,b)=>b.d.localeCompare(a.d));
@@ -306,7 +311,7 @@ app.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return
  if(b.dataset.pm!==undefined){const o=+b.dataset.pm;P={a:mStart(o),b:mEnd(o)};render()}
  if(b.id==="pr"){try{window.print()}catch(er){toast("استعمل Ctrl+P للطباعة")}}
  if(b.id==="xl")xl();
- if(b.id==="all"){document.querySelectorAll("#sl input[type=checkbox]").forEach(x=>x.checked=true);cnt();return}
+ if(b.id==="all"||b.id==="none"){document.querySelectorAll("#sl input[type=checkbox]").forEach(x=>x.checked=b.id==="all");cnt();return}
  if(b.id==="ins"&&IP){IP.prompt();IP.userChoice.finally(()=>{IP=null;render()})}
  if(b.id==="bk")DL.save({filename:"school-backup.json",data:JSON.stringify(S)}).then(()=>toast("تم الحفظ")).catch(()=>{});
  if(b.id==="rs"&&ask(b)){S={name:"",teachers:[],slots:{},abs:[],mk:[],hol:[]};save();render()}});
