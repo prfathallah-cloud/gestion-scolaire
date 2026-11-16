@@ -262,10 +262,9 @@ function slots(){const f=document.getElementById("fA");if(!f)return;const g=(D(f
 const cnt=()=>{const f=document.getElementById("fA");f.h.value=f.querySelectorAll("#sl input:checked").length||""};
 
 function lMk(){const l=S.mk.filter(pass).sort((a,b)=>b.d.localeCompare(a.d));
- return l.length?`<div class="wrap"><table><tr><th>التاريخ</th><th>الأستاذ</th><th>الساعات</th><th>القسم</th><th>يعوّض غياب</th><th></th></tr>${l.map(x=>{const a=S.abs.find(y=>y.id===x.ref);return `<tr><td>${x.d}</td><td>${esc(tn(x.t))}</td><td>${x.h}</td><td>${esc(x.c)}</td><td>${a?a.d:"—"}</td><td><button class="del" data-del="m" data-id="${x.id}">حذف</button></td></tr>`}).join("")}</table></div><p>المجموع: ${l.reduce((a,x)=>a+ +x.h,0)} ساعة</p>`:'<div class="empty">لا توجد حصص تعويض مطابقة.</div>'}
-const aOpts=t=>'<option value="">بدون ربط</option>'+S.abs.filter(a=>a.t===t).map(a=>`<option value="${a.id}">${a.d} — ${a.h} ساعة</option>`).join("");
+ return l.length?`<div class="wrap"><table><tr><th>التاريخ</th><th>الأستاذ</th><th>الساعات</th><th>القسم</th><th></th></tr>${l.map(x=>{return `<tr><td>${x.d}</td><td>${esc(tn(x.t))}</td><td>${x.h}</td><td>${esc(x.c)}</td><td><button class="del" data-del="m" data-id="${x.id}">حذف</button></td></tr>`}).join("")}</table></div><p>المجموع: ${l.reduce((a,x)=>a+ +x.h,0)} ساعة</p>`:'<div class="empty">لا توجد حصص تعويض مطابقة.</div>'}
 function vMk(){if(!S.teachers.length)return noT();
- return `<div class="card"><h2>تسجيل حصة تعويض</h2><form id="fM"><label>الأستاذ<select name="t">${opts()}</select></label><label>التاريخ<input type="date" name="d" value="${iso(now)}" required></label><label>عدد الساعات<input type="number" name="h" min="0.5" step="0.5" value="1" required></label><label>القسم<input name="c"></label><label>الغياب المعوَّض<select name="ref" id="ref">${aOpts(S.teachers[0].id)}</select></label><button class="btn">تسجيل التعويض</button></form></div><div class="card"><h2>سجل التعويض</h2>${fBar(0)}<div id="lst">${lMk()}</div></div>`}
+ return `<div class="card"><h2>تسجيل حصة تعويض</h2><form id="fM"><label>الأستاذ<select name="t">${opts()}</select></label><label>التاريخ<input type="date" name="d" value="${iso(now)}" required></label><label>عدد الساعات<input type="number" name="h" min="0.5" step="0.5" value="1" required></label><label>القسم<input name="c"></label><button class="btn">تسجيل التعويض</button></form></div><div class="card"><h2>سجل التعويض</h2>${fBar(0)}<div id="lst">${lMk()}</div></div>`}
 
 function vSet(){return `<div class="card"><h2>المؤسسة</h2><div class="row"><label>اسم المؤسسة (يظهر في التقارير)<input id="sn" value="${esc(S.name)}"></label></div></div>
  <div class="card"><h2>تنبيه الغياب</h2><div class="row"><label>الحد الأقصى لساعات الغياب غير المبرر في الفترة (0 = بدون تنبيه)<input type="number" id="lm" min="0" value="${+S.lim||0}"></label></div></div>
@@ -284,14 +283,14 @@ async function xl(){try{const W=XLSX.utils,wb=W.book_new(),add=(n,r)=>{const s=W
  const co=cstats();add("حسب القسم",[["القسم","المبرمجة","الغياب","التعويض","المنجزة","النسبة %"],...Object.keys(co).sort().map(c=>{const s=co[c],d=Math.max(0,s.p-s.ab+s.m);return [c,s.p,s.ab,s.m,d,s.p?Math.round(d/s.p*100):0]})]);
  const rg=r=>r.d>=P.a&&r.d<=P.b;
  add("الغيابات",[["التاريخ","الأستاذ","الساعات","الحالة","السبب"],...S.abs.filter(rg).map(x=>[x.d,tn(x.t),+x.h,x.j?"مبرر":"غير مبرر",x.r||""])]);
- add("التعويض",[["التاريخ","الأستاذ","الساعات","القسم","غياب معوَّض"],...S.mk.filter(rg).map(x=>[x.d,tn(x.t),+x.h,x.c||"",(S.abs.find(a=>a.id===x.ref)||{}).d||""])]);
+ add("التعويض",[["التاريخ","الأستاذ","الساعات","القسم"],...S.mk.filter(rg).map(x=>[x.d,tn(x.t),+x.h,x.c||""])]);
  const tt=[["الأستاذ","اليوم","الحصة","القسم","القاعة"]];S.teachers.forEach(t=>Object.keys(S.slots[t.id]||{}).sort().forEach(k=>{const c=cell(t.id,k),q=k.split("-");if(used(c))tt.push([t.name,DAYS[q[0]],HOURS[q[1]],c.c,c.r])}));add("استعمال الزمن",tt);
  wb.Workbook={Views:[{RTL:true}]};
  await DL.save({filename:"تقرير-"+P.a+"-"+P.b+".xlsx",data:XLSX.write(wb,{bookType:"xlsx",type:"array"})});toast("تم حفظ الملف")}catch(e){if(!e||e.code!=="declined")toast("تعذر التصدير")}}
 app.addEventListener("submit",e=>{e.preventDefault();const f=new FormData(e.target),id=e.target.id,v=k=>(f.get(k)||"").trim();
  if(id==="fT")S.teachers.push({id:uid(),name:v("n"),subject:v("s")});
  if(id==="fA")S.abs.push({id:uid(),t:f.get("t"),d:f.get("d"),h:+f.get("h"),sl:[...e.target.querySelectorAll("#sl input:checked")].map(i=>+i.value),j:f.get("j"),r:v("r")});
- if(id==="fM")S.mk.push({id:uid(),t:f.get("t"),d:f.get("d"),h:+f.get("h"),c:v("c"),ref:f.get("ref")});
+ if(id==="fM")S.mk.push({id:uid(),t:f.get("t"),d:f.get("d"),h:+f.get("h"),c:v("c")});
  if(id==="fH")S.hol.push({id:uid(),a:f.get("a"),b:f.get("b"),l:v("l")});
  save();render();toast("تم التسجيل")});
 app.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
@@ -312,7 +311,6 @@ app.addEventListener("change",e=>{const t=e.target,id=t.id,f=t.closest("form");
  if(id==="tm"){TT={m:t.value,v:""};render()}if(id==="tv"){TT.v=t.value;render()}
  if(t.dataset.k){const o=S.slots[TT.v]||(S.slots[TT.v]={}),c=o[t.dataset.k]||(o[t.dataset.k]={c:"",r:""});c[t.dataset.f]=t.value.trim();save();render()}
  if(f&&f.id==="fA"){if(t.name==="t"||t.name==="d")slots();else if(t.type==="checkbox")cnt()}
- if(f&&f.id==="fM"&&t.name==="t")document.getElementById("ref").innerHTML=aOpts(t.value);
  if(id==="im"&&t.files[0]){const r=new FileReader();r.onload=()=>{try{const p=JSON.parse(r.result);if(!p.teachers)throw 0;S=Object.assign({name:"",teachers:[],slots:{},abs:[],mk:[],hol:[]},p);save();tab="dash";render();toast("تم الاستيراد")}catch(er){toast("ملف غير صالح")}};r.readAsText(t.files[0])}});
 app.addEventListener("input",e=>{const t=e.target;if(t.id==="lm"){S.lim=+t.value;save()}if(t.id==="sn"){S.name=t.value;save();document.getElementById("hn").textContent=S.name||"تدبير المؤسسة التعليمية"}
  if(t.dataset.f&&t.closest(".flt")){F[t.dataset.f]=t.value;document.getElementById("lst").innerHTML=(tab==="abs"?lAbs:lMk)()}});
