@@ -123,6 +123,29 @@ header #sy[data-s="ok"]{background:#2e7d32;color:#fff}header #sy[data-s="err"]{b
 #sy svg{flex:none}#sy[data-s="sync"] svg{animation:spin 1s linear infinite}#sy[data-s="ok"] svg{animation:pop .3s ease}
 @keyframes spin{to{transform:rotate(360deg)}}
 @media (max-width:699px){#sy span{display:none}header #sy{padding:8px 10px}}
+/* adaptive layout: tablet + desktop */
+main{max-width:min(1720px,100%)}
+@media (min-width:700px){
+ th,td{white-space:normal}
+ .tt{table-layout:fixed;width:100%;min-width:0}
+ .tt th,.tt td{white-space:normal;overflow:hidden}
+ .tt td:first-child,.tt th:first-child{width:76px}
+ .tt td input{min-width:0;width:100%;font-size:clamp(11px,1.05vw,14px);padding:5px 2px}
+ .tt td input.r{font-size:clamp(10px,.9vw,12px)}
+ .ro{min-width:0;font-size:clamp(11px,1vw,13px);word-break:break-word}
+}
+@media (min-width:1000px) and (max-width:1279px){
+ body{grid-template-columns:76px 1fr}
+ nav{padding:16px 8px}nav button{justify-content:center;padding:12px 0}nav button span{display:none}
+}
+@media (min-width:1100px){
+ #app{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px;align-items:start}
+ #app>*{grid-column:1/-1;margin:0}
+ #app>.c7{grid-column:span 7}#app>.c5{grid-column:span 5}
+ #app[data-t=abs]>.card:nth-child(1),#app[data-t=mk]>.card:nth-child(1){grid-column:span 5}
+ #app[data-t=abs]>.card:nth-child(2),#app[data-t=mk]>.card:nth-child(2){grid-column:span 7}
+ #app[data-t=set]>.card{grid-column:span 6}
+}
 </style>
 </head>
 <body>
@@ -176,7 +199,7 @@ function vDash(){
  return `<div class="ph"><h2>${esc(S.name||"المؤسسة التعليمية")} — تقرير الساعات</h2><p>الفترة: ${P.a} إلى ${P.b}</p></div>${pBar()}
  <div class="stats"><div class="stat big"><b>${T.done||0}</b><span>ساعة منجزة</span></div><div class="stat"><b>${T.p||0}</b><span>ساعة مبرمجة</span></div><div class="stat r"><b>${T.ab||0}</b><span>ساعة غياب (${T.n||0} تغيب)</span></div><div class="stat"><b>${T.m||0}</b><span>ساعة تعويض</span></div><div class="stat${cf.list.length?" r":""}"><b>${cf.list.length}</b><span>تعارض في الجدول</span></div></div>
  ${cf.list.slice(0,6).map(c=>`<div class="warn np">تعارض ${c.f==="c"?"القسم":"القاعة"} «${esc(c.v)}» — ${DAYS[c.d]} ${HOURS[c.h]}: ${c.ts.map(tn).map(esc).join(" و ")}</div>`).join("")}
- ${alerts()}<div class="card"><div class="row np" style="margin:0 0 8px"><h2 style="margin:0;flex:1">الحصيلة لكل أستاذ</h2><button class="btn alt" id="pr">طباعة / PDF</button>${DL?'<button class="btn" id="xl">تصدير Excel</button>':""}</div>
+ ${alerts()}<div class="card c7"><div class="row np" style="margin:0 0 8px"><h2 style="margin:0;flex:1">الحصيلة لكل أستاذ</h2><button class="btn alt" id="pr">طباعة / PDF</button>${DL?'<button class="btn" id="xl">تصدير Excel</button>':""}</div>
  ${body?`<div class="wrap"><table><tr><th>الأستاذ</th><th>المادة</th><th>المبرمجة</th><th>الغياب</th><th>التعويض</th><th>المنجزة</th><th>الإنجاز</th><th></th></tr>${body}<tfoot><tr><td>المجموع</td><td></td><td>${T.p||0}</td><td>${T.ab||0}</td><td>${T.m||0}</td><td>${T.done||0}</td><td></td><td>${rate(T)}%</td></tr></tfoot></table></div>`:'<div class="empty">لا توجد بيانات بعد.</div>'}</div>
  ${byClass()}<p class="np" style="color:var(--mut);font-size:13px">المنجزة = المبرمجة − الغياب + التعويض، مع استثناء الأحد وأيام العطل.</p><div class="sg"><span>توقيع الأستاذ(ة)</span><span>توقيع المدير(ة)</span></div>`}
 
@@ -196,7 +219,7 @@ S.abs.forEach(r=>{if(r.d<P.a||r.d>P.b||hol(r.d))return;const w=(D(r.d).getDay()+
 S.mk.forEach(r=>{if(r.d>=P.a&&r.d<=P.b&&!hol(r.d)&&r.c)g(r.c,r.t).m+= +r.h});return o}
 function byClass(){const o=cdet(),ks=Object.keys(o).sort();if(!ks.length)return "";let un=0;S.abs.forEach(r=>{if(r.d>=P.a&&r.d<=P.b&&!hol(r.d)&&!(r.sl||[]).length)un+= +r.h});
 const tl=c=>Object.values(o[c]).reduce((a,s)=>({ab:a.ab+s.ab,m:a.m+s.m}),{ab:0,m:0});
-return `<div class="card"><h2>الحصيلة حسب القسم</h2><div class="gr">${ks.map(c=>{const s=tl(c);return `<button class="tile${s.ab>s.m?" bad":""}" data-cl="${esc(c)}"><b>${esc(c)}</b><span>غير منجزة <em>${s.ab}</em></span><span>تعويض <em>${s.m}</em></span></button>`}).join("")}</div><p class="np" style="color:var(--mut);font-size:13px;margin:8px 0 0">اضغط على قسم لعرض التفاصيل حسب الأستاذ والمادة.${un?` ${un} ساعة غياب مسجلة يدويًا لا تُنسب إلى قسم.`:""}</p></div>`}
+return `<div class="card c5"><h2>الحصيلة حسب القسم</h2><div class="gr">${ks.map(c=>{const s=tl(c);return `<button class="tile${s.ab>s.m?" bad":""}" data-cl="${esc(c)}"><b>${esc(c)}</b><span>غير منجزة <em>${s.ab}</em></span><span>تعويض <em>${s.m}</em></span></button>`}).join("")}</div><p class="np" style="color:var(--mut);font-size:13px;margin:8px 0 0">اضغط على قسم لعرض التفاصيل حسب الأستاذ والمادة.${un?` ${un} ساعة غياب مسجلة يدويًا لا تُنسب إلى قسم.`:""}</p></div>`}
 function showCl(c){const o=cdet()[c]||{},T={p:0,ab:0,m:0};
 const rows=Object.keys(o).map(id=>{const s=o[id],t=S.teachers.find(x=>x.id===id)||{name:"—",subject:""};T.p+=s.p;T.ab+=s.ab;T.m+=s.m;return `<tr><td>${esc(t.name)}</td><td>${esc(t.subject)}</td><td>${s.p}</td><td><b>${Math.max(0,s.p-s.ab+s.m)}</b></td><td>${s.ab}</td><td>${s.m}</td></tr>`}).join("");
 const m=document.createElement("div");m.className="md np";m.setAttribute("role","dialog");m.setAttribute("aria-modal","true");
@@ -247,8 +270,8 @@ function vSet(){return `<div class="card"><h2>المؤسسة</h2><div class="row
  <div class="card"><h2>النسخ الاحتياطي</h2><p style="color:var(--mut);font-size:14px">${ref?"البيانات متزامنة مع Firebase بين كل الأجهزة. صدّر نسخة احتياطية من حين لآخر للأمان.":"البيانات محفوظة في هذا المتصفح فقط، فصدّر نسخة بانتظام."}</p><div class="row">${DL?'<button class="btn" id="bk">حفظ نسخة احتياطية</button>':""}<label>استيراد نسخة<input type="file" id="im" accept=".json"></label><button class="del" id="rs">مسح كل البيانات</button></div></div>`}
 
 function render(){document.getElementById("hn").textContent=S.name||"تدبير المؤسسة التعليمية";
- document.getElementById("nav").innerHTML=TABS.map(t=>`<button role="tab" aria-selected="${t[0]===tab}" data-t="${t[0]}">${IC[t[0]]}<span>${t[1]}</span></button>`).join("");
- document.getElementById("app").innerHTML=({dash:vDash,tt:vTT,teachers:vTeachers,abs:vAbs,mk:vMk,set:vSet})[tab]();if(tab==="abs")slots()}
+ document.getElementById("nav").innerHTML=TABS.map(t=>`<button role="tab" aria-selected="${t[0]===tab}" data-t="${t[0]}" title="${t[1]}" aria-label="${t[1]}">${IC[t[0]]}<span>${t[1]}</span></button>`).join("");
+ document.getElementById("app").dataset.t=tab;document.getElementById("app").innerHTML=({dash:vDash,tt:vTT,teachers:vTeachers,abs:vAbs,mk:vMk,set:vSet})[tab]();if(tab==="abs")slots()}
 const app=document.getElementById("app");
 document.getElementById("nav").addEventListener("click",e=>{const b=e.target.closest("button");if(b){tab=b.dataset.t;render();window.scrollTo({top:0})}});
 async function xl(){try{const W=XLSX.utils,wb=W.book_new(),add=(n,r)=>{const s=W.aoa_to_sheet(r);s["!cols"]=r[0].map(()=>({wch:18}));W.book_append_sheet(wb,s,n)};
