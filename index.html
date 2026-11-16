@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>تدبير المؤسسة التعليمية</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0b3340">
+<meta name="theme-color" content="#0a2a63">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="mobile-web-app-capable" content="yes">
@@ -98,13 +98,38 @@ header #lo{display:none}
 .mb{border-radius:16px;max-height:80vh;padding-bottom:16px;animation:pop .2s ease}
 td.mv{white-space:nowrap}.mvb{padding:4px 10px;min-width:34px;font-size:16px}.btn:disabled{opacity:.35;cursor:default}
 .ro{min-width:110px}.ro .sj{color:var(--ac);font-size:12px;font-weight:600}
+.tt th{font-size:12px;text-align:center}.tt td:first-child{font-size:13px;font-weight:600;color:var(--ink);width:84px}
+/* palette: bleu marine / bleu / or (logo) */
+:root{--bg:#f3f6fb;--sf:#fff;--ink:#0f2038;--mut:#5a6b84;--ln:#dbe3ee;--ac:#0b4fa8;--acs:#e4eefb;--gd:#e0a100;--gds:#fff4d6;--rd:#c2410c;--rds:#fdeadf;--ok:#2e7d32}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#0b1424;--sf:#121e33;--ink:#e8eef9;--mut:#9aabc6;--ln:#243452;--ac:#5aa2ff;--acs:#16294a;--gd:#f2c14e;--gds:#3a3016;--rd:#ff9a6b;--rds:#3b2418;--ok:#7fd183}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#0b1424;--sf:#121e33;--ink:#e8eef9;--mut:#9aabc6;--ln:#243452;--ac:#5aa2ff;--acs:#16294a;--gd:#f2c14e;--gds:#3a3016;--rd:#ff9a6b;--rds:#3b2418;--ok:#7fd183}
+body::before{background:#0a2a63}
+header{background:linear-gradient(135deg,#0a2a63,#0b4fa8);border-bottom:3px solid var(--gd);grid-template-columns:auto 1fr auto auto}
+header h1,header p{grid-column:2}header p{color:#cfe0fa;opacity:1}
+.hl{grid-column:1;grid-row:1/3;width:50px;height:50px;object-fit:contain;background:#fff;border-radius:50%;padding:4px;margin-inline-end:6px}
+header .btn.alt{background:rgba(255,255,255,.15);color:#fff}
+h2{position:relative;padding-inline-start:12px}h2::before{content:"";position:absolute;inset-inline-start:0;top:.3em;bottom:.3em;width:4px;border-radius:2px;background:var(--gd)}
+th{background:var(--bg)}
+.stat b{color:var(--ac)}.stat.r b{color:var(--rd)}.stat::before{background:var(--ac)}.stat.r::before{background:var(--rd)}
+.stat.big{background:linear-gradient(135deg,#0a2a63,#0b4fa8);border-color:#0a2a63;box-shadow:inset 0 -3px 0 var(--gd)}.stat.big b{color:#fff}.stat.big span{color:#d6e4fb}
+.bar i{background:linear-gradient(90deg,var(--ac),#3b8cf0)}
+.tile{border-top:3px solid var(--gd)}.tile.bad{border-top-color:var(--rd)}
+.btn{box-shadow:0 1px 2px rgba(10,42,99,.25)}.btn.alt{box-shadow:none}
+nav button[aria-selected=true]{box-shadow:inset -3px 0 0 var(--gd)}
+.lgo{width:96px;height:96px;object-fit:contain;align-self:center}#lg h2{text-align:center}#lg h2::before{display:none}
+@media (max-width:699px){nav button[aria-selected=true]{box-shadow:none}.hl{width:42px;height:42px}}
+header #sy{display:none;align-items:center;gap:6px;position:static;grid-row:1/3;padding:6px 12px;font-size:13px}
+header #sy[data-s="ok"]{background:#2e7d32;color:#fff}header #sy[data-s="err"]{background:#c2410c;color:#fff}
+#sy svg{flex:none}#sy[data-s="sync"] svg{animation:spin 1s linear infinite}#sy[data-s="ok"] svg{animation:pop .3s ease}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (max-width:699px){#sy span{display:none}header #sy{padding:8px 10px}}
 </style>
 </head>
 <body>
-<header><h1 id="hn">تدبير المؤسسة التعليمية</h1><p>استعمال الزمن · الغيابات · التعويض · الساعات المنجزة</p><button class="btn alt ibt" id="ib">تثبيت التطبيق</button><button class="btn alt" id="lo">خروج</button></header>
+<header><img class="hl" src="icon-192.png" alt="" onerror="this.style.display='none'"><h1 id="hn">تدبير المؤسسة التعليمية</h1><p>استعمال الزمن · الغيابات · التعويض · الساعات المنجزة</p><button class="btn alt" id="sy" aria-label="مزامنة البيانات"></button><button class="btn alt ibt" id="ib">تثبيت التطبيق</button><button class="btn alt" id="lo">خروج</button></header>
 <nav role="tablist" id="nav"></nav>
 <main id="app"></main>
-<div id="lg"><form><h2>تسجيل الدخول</h2><button type="button" class="btn" id="gb">الدخول بحساب Google</button><button type="button" class="btn alt ibt">تثبيت التطبيق</button><p id="le" role="alert"></p></form></div><div id="toast" role="status"></div>
+<div id="lg"><form><img class="lgo" src="icon-192.png" alt="" onerror="this.style.display='none'"><h2>تسجيل الدخول</h2><button type="button" class="btn" id="gb">الدخول بحساب Google</button><button type="button" class="btn alt ibt">تثبيت التطبيق</button><p id="le" role="alert"></p></form></div><div id="toast" role="status"></div>
 <script>
 const DAYS=["الإثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"],HOURS=["08:00-09:00","09:00-10:00","10:00-11:00","11:00-12:00","14:00-15:00","15:00-16:00","16:00-17:00","17:00-18:00"];
 const ic=d=>`<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
@@ -119,7 +144,14 @@ try{let r=localStorage.getItem("school-v2");if(r)S=Object.assign(S,JSON.parse(r)
 const FB={apiKey:"AIzaSyDA6ejooYGaCMuOlL4fw0YGoh3KdntguLM",authDomain:"gestion-scolaire-b5a16.firebaseapp.com",projectId:"gestion-scolaire-b5a16",storageBucket:"gestion-scolaire-b5a16.firebasestorage.app",messagingSenderId:"580267734253",appId:"1:580267734253:web:eaacac6cd1854c12b1c8e4"};
 let ref=null,auth=null,tmr=null,IP=null;
 const save=()=>{try{localStorage.setItem("school-v2",JSON.stringify(S))}catch(e){}
- if(ref&&auth&&auth.currentUser){clearTimeout(tmr);tmr=setTimeout(()=>ref.set(JSON.parse(JSON.stringify(S))).catch(()=>toast("تعذرت المزامنة مع قاعدة البيانات")),500)}};
+ if(ref&&auth&&auth.currentUser){setSync("sync");clearTimeout(tmr);tmr=setTimeout(pushCloud,500)}};
+const SYL={ok:"تمت المزامنة",sync:"جارٍ المزامنة…",err:"غير متزامن"},svg=(d,w)=>`<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="${w||2}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const SYI={ok:svg('<path d="M5 12.5l4.5 4.5L19 7.5"/>',2.8),sync:svg('<path d="M3 12a9 9 0 0115-6.7L21 8M21 3v5h-5M21 12a9 9 0 01-15 6.7L3 16M3 21v-5h5"/>'),err:svg('<path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L2.4 18a2 2 0 001.7 3h15.8a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/>')};
+function setSync(st){const b=document.getElementById("sy");if(!b||b.dataset.s===st)return;b.dataset.s=st;b.innerHTML=SYI[st]+"<span>"+SYL[st]+"</span>";b.title=SYL[st]}
+const pushCloud=()=>{setSync("sync");return ref.set(JSON.parse(JSON.stringify(S))).then(()=>{setSync("ok");return true}).catch(()=>{setSync("err");toast("تعذرت المزامنة مع قاعدة البيانات");return false})};
+const syncNow=()=>{if(!(ref&&auth&&auth.currentUser))return;const b=document.getElementById("sy");
+ if(b.dataset.s!=="ok"){pushCloud().then(ok=>ok&&toast("تمت مزامنة البيانات"));return}
+ setSync("sync");ref.get({source:"server"}).then(d=>{if(d.exists){S=Object.assign({name:"",teachers:[],slots:{},abs:[],mk:[],hol:[]},d.data());try{localStorage.setItem("school-v2",JSON.stringify(S))}catch(e){}render()}setSync("ok");toast("البيانات محدّثة")}).catch(()=>{setSync("err");toast("تعذر الاتصال بالخادم")})};
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6),tn=id=>(S.teachers.find(t=>t.id===id)||{name:"—"}).name;
 const cell=(t,k)=>(S.slots[t]||{})[k],used=c=>c&&(c.c||c.r),hol=d=>S.hol.some(h=>d>=h.a&&d<=h.b);
@@ -176,8 +208,8 @@ function vTT(){
  if(TT.m==="t"&&!S.teachers.some(t=>t.id===TT.v))TT.v=S.teachers[0].id;
  if(TT.m!=="t"&&!vals(TT.m).includes(TT.v))TT.v=vals(TT.m)[0]||"";
  const list=TT.m==="t"?opts(TT.v):vals(TT.m).map(v=>`<option${v===TT.v?" selected":""}>${esc(v)}</option>`).join(""),cf=confl();
- let g='<tr><th></th>'+DAYS.map(d=>`<th>${d}</th>`).join("")+"</tr>";
- HOURS.forEach((hr,i)=>{g+=`<tr><td>${hr}</td>`+DAYS.map((d,j)=>{const k=j+"-"+i;let h="";
+ let g='<tr><th></th>'+HOURS.map(h=>`<th>${h}</th>`).join("")+"</tr>";
+ DAYS.forEach((d,j)=>{g+=`<tr><td>${d}</td>`+HOURS.map((hr,i)=>{const k=j+"-"+i;let h="";
   if(TT.m==="t"){const c=cell(TT.v,k)||{c:"",r:""},b=cf.bad[TT.v+"|"+k]?" cf":"";h=`<input class="${c.c?"on":""}${b}" data-k="${k}" data-f="c" value="${esc(c.c)}" placeholder="القسم" aria-label="القسم ${d} ${hr}" list="dc"><input class="r${b}" data-k="${k}" data-f="r" value="${esc(c.r)}" placeholder="القاعة" aria-label="القاعة ${d} ${hr}" list="dr">`}
   else{const o=S.teachers.filter(t=>{const c=cell(t.id,k);return c&&c[TT.m]===TT.v}).map(t=>`<div class="ro"><b>${esc(t.name)}</b>${t.subject?` <span class="sj">· ${esc(t.subject)}</span>`:""}<small>${esc(cell(t.id,k)[TT.m==="c"?"r":"c"])}</small></div>`).join("");h=o}
   return `<td>${h}</td>`}).join("")+"</tr>"});
@@ -261,17 +293,18 @@ DL={save:({filename,data})=>{const a=document.createElement("a");a.href=URL.crea
 function initCloud(){
  if(!window.firebase||FB.apiKey==="YOUR_API_KEY"){const o=document.getElementById("lg");if(o)o.remove();return}
  firebase.initializeApp(FB);auth=firebase.auth();const db=firebase.firestore();db.enablePersistence({synchronizeTabs:true}).catch(()=>{});ref=db.doc("school/main");
- const ov=document.getElementById("lg"),lo=document.getElementById("lo");
+ const ov=document.getElementById("lg"),lo=document.getElementById("lo"),sy=document.getElementById("sy");sy.onclick=syncNow;
  document.getElementById("gb").onclick=()=>{const p=new firebase.auth.GoogleAuthProvider(),le=document.getElementById("le");p.setCustomParameters({prompt:"select_account"});le.textContent="";auth.signInWithPopup(p).catch(e=>{if(e.code==="auth/popup-blocked"||e.code==="auth/operation-not-supported-in-this-environment")auth.signInWithRedirect(p);else if(e.code!=="auth/popup-closed-by-user"&&e.code!=="auth/cancelled-popup-request")le.textContent="تعذر الدخول. تأكد من تفعيل Google وإضافة النطاق في Firebase."})};
  lo.onclick=()=>auth.signOut();let un=null;
+ addEventListener("offline",()=>setSync("err"));addEventListener("online",()=>{if(auth.currentUser)pushCloud()});
  auth.onAuthStateChanged(u=>{if(un){un();un=null}
-  if(!u){ov.style.display="flex";lo.style.display="none";return}
-  ov.style.display="none";lo.style.display="block";
-  un=ref.onSnapshot(s=>{if(s.metadata.hasPendingWrites)return;
+  if(!u){ov.style.display="flex";lo.style.display="none";sy.style.display="none";return}
+  ov.style.display="none";lo.style.display="block";sy.style.display="inline-flex";setSync("sync");
+  un=ref.onSnapshot({includeMetadataChanges:true},s=>{if(s.metadata.hasPendingWrites){setSync("sync");return}if(!s.metadata.fromCache)setSync("ok");
    if(!s.exists){if(!s.metadata.fromCache)ref.set(JSON.parse(JSON.stringify(S)));return}
    S=Object.assign({name:"",teachers:[],slots:{},abs:[],mk:[],hol:[]},s.data());
    try{localStorage.setItem("school-v2",JSON.stringify(S))}catch(e){}
-   const a=document.activeElement;if(!(a&&/INPUT|SELECT|TEXTAREA/.test(a.tagName)&&a.closest("main")))render()},er=>{const d=er&&er.code==="permission-denied";toast(d?"هذا الحساب غير مسموح له بالدخول":"تعذر الاتصال بقاعدة البيانات");if(d){document.getElementById("le").textContent="هذا الحساب غير مسموح له بالدخول";auth.signOut()}})})}
+   const a=document.activeElement;if(!(a&&/INPUT|SELECT|TEXTAREA/.test(a.tagName)&&a.closest("main")))render()},er=>{setSync("err");const d=er&&er.code==="permission-denied";toast(d?"هذا الحساب غير مسموح له بالدخول":"تعذر الاتصال بقاعدة البيانات");if(d){document.getElementById("le").textContent="هذا الحساب غير مسموح له بالدخول";auth.signOut()}})})}
 const ibs=[...document.querySelectorAll(".ibt")],showIb=on=>ibs.forEach(b=>b.style.display=on?"block":"none");
 const standalone=()=>matchMedia("(display-mode: standalone)").matches||navigator.standalone;
 const ios=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
